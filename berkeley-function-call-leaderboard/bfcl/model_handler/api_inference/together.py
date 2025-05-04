@@ -1,4 +1,6 @@
+import ast
 import os
+import re
 
 from bfcl.constants.default_prompts import DEFAULT_SYSTEM_PROMPT_LIVE
 from bfcl.model_handler.api_inference.openai import OpenAIHandler
@@ -44,3 +46,38 @@ class TogetherAPIHandler(OpenAIHandler):
             tools=[],
         )
         return res
+
+
+    @override
+    def decode_ast(self, result, language="Python"):
+        # Extract function call info for all function calls
+        def get_full_func_name(func):
+            if isinstance(func, ast.Name):
+                return func.id
+            elif isinstance(func, ast.Attribute):
+                return f"{get_full_func_name(func.value)}.{func.attr}"
+            return None
+        def extract_all_func_calls(code: str):
+            tree = ast.parse(code)
+            results = []
+
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Call):
+                    func_name = get_full_func_name(node.func)
+                    if func_name in ['print', 'json.dumps', 'json.dump']: continue
+
+                    kwargs = {
+                        kw.arg: ast.literal_eval(kw.value)
+                        for kw in node.keywords if kw.arg is not None
+                    }
+
+                    results.append({func_name: kwargs})
+
+            return results
+
+
+        content_match = re.search(r'<\|CODE\|>(.*?)<\|CODE\|>', result, re.DOTALL)
+        if not content_match: return []
+        code_content = content_match.group(1).strip()
+        decoded_output = extract_all_func_calls(code_content)
+        return decoded_output

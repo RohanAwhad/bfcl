@@ -370,9 +370,6 @@ def func_doc_to_python_func_signature(function, test_category):
         return function
     assert type(function) == list
 
-    def normalize_name(name: str) -> str:
-        return name.replace(".", "_")
-
     def get_type(param_type: str) -> str:
         return {
             "integer": "int",
@@ -411,27 +408,51 @@ def func_doc_to_python_func_signature(function, test_category):
 
     output = []
     seen = set()
+    class_map = {}
 
     for func in function:
-        func_name = normalize_name(func["name"])
-        if func_name in seen:
-            continue
-        seen.add(func_name)
+        full_name = func["name"]
+        if full_name in seen: continue
+        seen.add(full_name)
+
         description = func.get("description", "").strip()
         params = func.get("parameters", {})
         properties = params.get("properties", {})
         required = params.get("required", [])
 
-        args_str = format_args(properties, required)
-        doc_args = format_docstring(properties)
+        if "." in full_name:
+            class_name, method_name = full_name.split(".", 1)
+            args_str = format_args(properties, required)
+            doc_args = format_docstring(properties)
+            method_def = f"""    @staticmethod
+    def {method_name}({args_str}) -> Any:
+        \"\"\"{description}
 
-        func_def = f"""def {func_name}({args_str}):
+{doc_args}
+
+        Returns:
+            Any: {description if description.endswith('.') else description + '.'}
+        \"\"\"
+        pass\n"""
+            class_map.setdefault(class_name, []).append(method_def)
+        else:
+            func_name = full_name
+            args_str = format_args(properties, required)
+            doc_args = format_docstring(properties)
+            func_def = f"""def {func_name}({args_str}) -> Any:
     \"\"\"{description}
 
 {doc_args}
+
+    Returns:
+        Any: {description if description.endswith('.') else description + '.'}
     \"\"\"
     pass\n"""
-        output.append(func_def)
+            output.append(func_def)
+
+    for class_name, methods in class_map.items():
+        class_block = f"class {class_name}:\n" + "".join(methods) + "\n"
+        output.append(class_block)
 
     return "\n".join(output)
 

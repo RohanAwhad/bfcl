@@ -94,7 +94,7 @@ def get_involved_test_entries(test_category_args, run_ids):
         for test_category, file_to_open in zip(
             all_test_categories[:], all_test_file_paths[:]
         ):
-            all_test_entries_involved.extend(load_file(PROMPT_PATH / file_to_open))
+            all_test_entries_involved.extend(load_file(PROMPT_PATH / file_to_open))#[:3])  # (rohan)
 
     return (
         all_test_file_paths,

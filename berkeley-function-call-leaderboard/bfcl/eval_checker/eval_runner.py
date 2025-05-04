@@ -426,7 +426,7 @@ def evaluate_task(
 
     # Find the corresponding test file.
     prompt_file = find_file_with_suffix(PROMPT_PATH, test_category)
-    prompt = load_file(prompt_file, sort_by_id=True)
+    prompt = load_file(prompt_file, sort_by_id=True)#[:3]  # (rohan): for testing
 
     if is_relevance_or_irrelevance(test_category):
         accuracy, total_count = relevance_file_runner(
@@ -436,7 +436,7 @@ def evaluate_task(
     else:
         # Find the corresponding possible answer file
         possible_answer_file = find_file_with_suffix(POSSIBLE_ANSWER_PATH, test_category)
-        possible_answer = load_file(possible_answer_file, sort_by_id=True)
+        possible_answer = load_file(possible_answer_file, sort_by_id=True)#[:3]  # (rohan): for testing
 
         if is_multi_turn(test_category):
             accuracy, total_count = multi_turn_runner(

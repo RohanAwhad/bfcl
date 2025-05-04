@@ -37,3 +37,5 @@ berkeley-function-call-leaderboard/utils/ground_truth_conversation/
 
 # Ignore the wandb cache:
 **/wandb/
+berkeley-function-call-leaderboard/pyrightconfig.json
+berkeley-function-call-leaderboard/uv.lock

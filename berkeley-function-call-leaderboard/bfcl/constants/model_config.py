@@ -18,6 +18,7 @@ from bfcl.model_handler.api_inference.nova import NovaHandler
 from bfcl.model_handler.api_inference.novita import NovitaHandler
 from bfcl.model_handler.api_inference.nvidia import NvidiaHandler
 from bfcl.model_handler.api_inference.openai import OpenAIHandler
+from bfcl.model_handler.api_inference.together import TogetherAPIHandler
 from bfcl.model_handler.api_inference.writer import WriterHandler
 from bfcl.model_handler.api_inference.yi import YiHandler
 from bfcl.model_handler.local_inference.bielik import BielikHandler
@@ -1258,6 +1259,18 @@ local_inference_model_map = {
         org="Qwen",
         license="apache-2.0",
         model_handler=QwenHandler,
+        input_price=None,
+        output_price=None,
+        is_fc_model=False,
+        underscore_to_dot=False,
+    ),
+    "Qwen/Qwen2.5-7B-Instruct-Turbo": ModelConfig(
+        model_name="Qwen/Qwen2.5-7B-Instruct-Turbo",
+        display_name="Qwen2.5-7B-Instruct-Turbo (Prompt)",
+        url="https://huggingface.co/Qwen/Qwen2.5-7B-Instruct",
+        org="Qwen",
+        license="apache-2.0",
+        model_handler=TogetherAPIHandler,
         input_price=None,
         output_price=None,
         is_fc_model=False,

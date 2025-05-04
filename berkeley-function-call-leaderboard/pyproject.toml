@@ -46,6 +46,7 @@ include = ["bfcl*"]
 [dependency-groups]
 dev = [
     "debugpy>=1.8.14",
+    "loguru>=0.7.3",
 ]
 
 [project.urls]

@@ -20,6 +20,7 @@ from bfcl.constants.model_config import MODEL_CONFIG_MAPPING
 from bfcl.model_handler.model_style import ModelStyle
 from bfcl.utils import is_multi_turn, parse_test_category_argument, sort_key
 from tqdm import tqdm
+from loguru import logger
 
 RETRY_LIMIT = 3
 # 60s for the timer to complete. But often we find that even with 60 there is a conflict. So 65 is a safe no.
@@ -196,6 +197,7 @@ def multi_threaded_inference(handler, test_case, include_input_log, exclude_stat
                 # For example, timeout error or FC model returning invalid JSON response.
                 # Since temperature is already set to 0.001, retrying the same test case will not help.
                 # So we continue the generation process and record the error message as the model response
+                logger.exception(e)
                 print("-" * 100)
                 print(
                     "❗️❗️ Error occurred during inference. Maximum reties reached for rate limit or other error. Continuing to next test case."

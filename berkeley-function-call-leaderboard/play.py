@@ -5,15 +5,17 @@ from bfcl.constants.eval_config import RESULT_PATH, SCORE_PATH
 from bfcl.eval_checker.eval_runner import main as evaluation_main
 
 model = "Qwen/Qwen2.5-7B-Instruct-Turbo"
-test_category = ["live_simple", "live_multiple", "live_parallel", "live_parallel_multiple"]
-result_dir = RESULT_PATH
-score_dir = SCORE_PATH
+test_category = ["live_simple",]
+# test_category = ["live_simple", "live_multiple", "live_parallel", "live_parallel_multiple"]
+
+result_dir = './result_v1'
+score_dir = './score_v1'
 
 args = SimpleNamespace(
     model = model,
     test_category = test_category,
     # below are defaults takes from bfcl/__main__.py
-    temperature=0.001,
+    temperature=0.72,
     include_input_log=True,
     exclude_state_log=False,
     num_gpus=1,
@@ -29,5 +31,5 @@ args = SimpleNamespace(
 generation_main(args)
 
 
-print('Running evaluation ...')
-evaluation_main([model], test_category, result_dir, score_dir)
+# print('Running evaluation ...')
+# evaluation_main([model], test_category, result_dir, score_dir)

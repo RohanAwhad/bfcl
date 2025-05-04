@@ -39,3 +39,4 @@ berkeley-function-call-leaderboard/utils/ground_truth_conversation/
 **/wandb/
 berkeley-function-call-leaderboard/pyrightconfig.json
 berkeley-function-call-leaderboard/uv.lock
+berkeley-function-call-leaderboard/result*

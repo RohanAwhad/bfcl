@@ -5,7 +5,7 @@ import json
 import operator
 import re
 from functools import reduce
-from typing import Callable, List, Optional, Type, Union
+from typing import Callable, List, Optional, Type, Union, Any, Dict
 
 from bfcl.constants.default_prompts import DEFAULT_SYSTEM_PROMPT
 from bfcl.constants.type_mappings import GORILLA_TO_OPENAPI
@@ -305,14 +305,12 @@ def resolve_ast_by_type(value):
     return output
 
 
-def system_prompt_pre_processing_chat_model(prompts, function_docs, test_category):
+def system_prompt_pre_processing_chat_model(prompts, function_docs, test_category, system_prompt_template = DEFAULT_SYSTEM_PROMPT):
     """
     Add a system prompt to the chat model to instruct the model on the available functions and the expected response format.
     If the prompts list already contains a system prompt, append the additional system prompt content to the existing system prompt.
     """
     assert type(prompts) == list
-
-    system_prompt_template = DEFAULT_SYSTEM_PROMPT
 
     system_prompt = system_prompt_template.format(functions=function_docs)
 
@@ -366,6 +364,76 @@ def _get_language_specific_hint(test_category):
         return " Note that the provided function is in JavaScript syntax."
     else:
         return " Note that the provided function is in Python 3 syntax."
+
+def func_doc_to_python_func_signature(function, test_category):
+    if len(function) == 0:
+        return function
+    assert type(function) == list
+
+    def normalize_name(name: str) -> str:
+        return name.replace(".", "_")
+
+    def get_type(param_type: str) -> str:
+        return {
+            "integer": "int",
+            "string": "str",
+            "float": "float",
+            "boolean": "bool",
+            "array": "list",
+            "dict": "dict"
+        }.get(param_type, "Any")
+
+    def format_args(properties: Dict[str, Any], required: List[str]) -> str:
+        args = []
+        for key, val in properties.items():
+            t = get_type(val.get("type", "Any"))
+            if key in required:
+                args.append(f"{key}: {t}")
+            else:
+                default = {
+                    "str": '""',
+                    "int": "0",
+                    "float": "0.0",
+                    "bool": "False",
+                    "list": "[]",
+                    "dict": "{}"
+                }.get(t, "None")
+                args.append(f"{key}: {t} = {default}")
+        return ", ".join(args)
+
+    def format_docstring(properties: Dict[str, Any]) -> str:
+        doc = []
+        for key, val in properties.items():
+            t = get_type(val.get("type", "Any"))
+            desc = val.get("description", "")
+            doc.append(f"        {key} ({t}): {desc}")
+        return "\n".join(doc)
+
+    output = []
+    seen = set()
+
+    for func in function:
+        func_name = normalize_name(func["name"])
+        if func_name in seen:
+            continue
+        seen.add(func_name)
+        description = func.get("description", "").strip()
+        params = func.get("parameters", {})
+        properties = params.get("properties", {})
+        required = params.get("required", [])
+
+        args_str = format_args(properties, required)
+        doc_args = format_docstring(properties)
+
+        func_def = f"""def {func_name}({args_str}):
+    \"\"\"{description}
+
+{doc_args}
+    \"\"\"
+    pass\n"""
+        output.append(func_def)
+
+    return "\n".join(output)
 
 
 def func_doc_language_specific_pre_processing(function, test_category):

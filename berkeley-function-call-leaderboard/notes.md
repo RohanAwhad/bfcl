@@ -86,3 +86,77 @@ Temperature: 0.001
 
 - Temperature: 0.72  # golden ratio xD
 - Updated system with the functions and few shot examples
+
+#### Results:
+
+🦍 Model: Qwen_Qwen2.5-7B-Instruct-Turbo
+✅ Test completed: live_parallel_multiple. 🎯 Accuracy: 0.08333333333333333
+✅ Test completed: live_multiple. 🎯 Accuracy: 0.603988603988604
+✅ Test completed: live_simple. 🎯 Accuracy: 0.3992248062015504
+✅ Test completed: live_parallel. 🎯 Accuracy: 0.1875
+
+#### Look at the data:
+
+##### Live Multiple:
+
+
+- Straight up wrong xD:
+    - Failures:
+        - 55-22-2
+        - 59-22-6
+- When the expected argument is a complex type, my current encoder doesn't account for the nested dtypes and information. This is bad. Now I am planning on encoding dict into pydantic models, so that it is verifiable, and is pretty verbose for the model to understand.
+    - Failues:
+        - 0-0-0
+        - 1-0-1
+        - 63-25-0: This is also interesting. lets see
+        - 88-38-5: enum was given, but because llm didnt have that information, it messed up. 
+        - 93-41-0: because the defaults are not known to the model, it messed up.
+- Sometimes, the model doesn't use arg name, like i am expecting: "func(param_name=value)", but it does "func(value)"
+    - May be prompting will help here.
+    - Failures:
+        - 3-2-0
+        - 29-9-0: it basically used variables and then passed them to the function
+        - 43-16-2
+        - 62-24-0
+        - 65-26-1
+- Assumptions: Because the request was in vietnamese, and the text also asked for 123 Hanoi Street, it assumed "123 Hanoi Street, Hanoi, Vietnam"
+    - Failures:
+        - 4-2-1  (described above)
+        - 5-3-0  (here it did not assume anything and that failed xD)
+- ASsumptions:
+    - Failures:
+        - 82-37-0: didn't use default name
+- Just doesn't conform with BFCL, but would have been right?
+    - Failures:
+        - 8-4-0: I guess i should stop generation with second <|CODE|> might have to look into it xD
+        - 66-27-0: also instructions weren't clear enough.
+- Asking in different language:
+    - Failures:
+        - 21-4-13: user asked in korean, llm responded in korean, but didn't invoke tool
+        - 24-5-1: user asked in indonesian, llm failed in translation and choose wrong brand
+        - 54-22-1: user ased in indonesian. llm correctly translated to english color 'red' and searched for it. The description didn't mention that the color should be in indonesian lang.
+- Hallucination:
+    - Failures:
+        - 26-6-1: user asked to search for birthday, but it hallucinated the birtdate 
+- Because the requests were too simple e.g. calculator functions, model just wrote the python code
+    - Failures:
+        - 27-7-0: described above
+        - 32-10-2
+        - 33-10-3
+- AST decoder error. Malformed node
+    - Failures:
+        - 30-10-0: seems alright. I dont know what meesed up.
+        - 44-17-0: seems alright. Again idk what messed up
+        - 50-20-0: same.
+        - 61-23-0
+- AST decoder messed up:
+    - Failures:
+        - 89-39-0: the value was in another variable which was passed in
+        - 98-42-2: everyting was correct
+- Asked for clarifying information:
+    - Failures:
+        - 38-14-0
+        - 49-19-0: unnecessary
+- Answered directly:
+    - Failures:
+        - 105-43-3

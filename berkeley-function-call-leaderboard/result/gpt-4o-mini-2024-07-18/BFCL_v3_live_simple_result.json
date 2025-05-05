@@ -1,0 +1,3 @@
+{"id": "live_simple_0-0-0", "result": "[get_user_info(user_id=7890, special='black')]", "input_token_count": 377, "output_token_count": 14, "latency": 0.864412784576416}
+{"id": "live_simple_1-1-0", "result": "[github_star(repos='ShishirPatil/gorilla,gorilla-llm/gorilla-cli', aligned=True)]", "input_token_count": 446, "output_token_count": 29, "latency": 0.6112711429595947}
+{"id": "live_simple_2-2-0", "result": "[uber.ride(loc='2020 Addison Street, Berkeley, CA, USA', type='comfort', time=600)]", "input_token_count": 440, "output_token_count": 26, "latency": 0.7005319595336914}
